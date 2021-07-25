@@ -1,16 +1,53 @@
 CLASS net/minecraft/client/gui/components/EditBox
+	COMMENT An editable text box widget.
+	FIELD CURSOR_APPEND_CHARACTER Ljava/lang/String;
+		COMMENT Drawn when the cursor is placed after all text and no text is selected.
+		COMMENT The current length of the edit box's value must also be less than its maximum length.
+	FIELD bordered Z
+		COMMENT Whether a dark background and border should be drawn. If false, no background is drawn.
 	FIELD canLoseFocus Z
 		COMMENT if true the textbox can lose focus by clicking elsewhere on the screen
 	FIELD displayPos I
 		COMMENT The current character index that should be used as start of the rendered text.
 	FIELD filter Ljava/util/function/Predicate;
 		COMMENT Called to check if the text is valid
+	FIELD frame I
+		COMMENT Used to time cursor blinks.
 	FIELD highlightPos I
-		COMMENT other selection position, maybe the same as the cursor
+		COMMENT The position other end of the current selection.
+		COMMENT
+		COMMENT If no text is currently selected, it is the same as the cursor.
+		COMMENT While text is being selected, it does not move (the cursor moves instead).
 	FIELD isEditable Z
 		COMMENT If this value is true along with isFocused, keyTyped will process the keys.
+	FIELD maxLength I
+		COMMENT The maximum length of {@code net.minecraft.client.gui.components.EditBox#value}.
+	FIELD responder Ljava/util/function/Consumer;
+		COMMENT Called when the edit box is modified.
+		COMMENT Its sole argument is the new value of the edit box.
+	FIELD suggestion Ljava/lang/String;
+		COMMENT A suggestion for some text for the user.
+		COMMENT Written in light gray behind the edit box's value.
+		COMMENT
+		COMMENT As an example, it is used when tab-completing commands.
 	FIELD value Ljava/lang/String;
 		COMMENT Has the current text being edited on the textbox.
+	METHOD <init> (Lnet/minecraft/client/gui/Font;IIIILnet/minecraft/client/gui/components/EditBox;Lnet/minecraft/network/chat/Component;)V
+		ARG 1 font
+		ARG 2 x
+		ARG 3 y
+		ARG 4 width
+		ARG 5 height
+		ARG 6 editBoxToCopy
+			COMMENT set the value of the new edit box to this existing one
+		ARG 7 narrationMsg
+	METHOD <init> (Lnet/minecraft/client/gui/Font;IIIILnet/minecraft/network/chat/Component;)V
+		ARG 1 font
+		ARG 2 x
+		ARG 3 y
+		ARG 4 width
+		ARG 5 height
+		ARG 6 narrationMsg
 	METHOD changeFocus (Z)Z
 		ARG 1 focus
 	METHOD charTyped (CI)Z
@@ -19,9 +56,17 @@ CLASS net/minecraft/client/gui/components/EditBox
 	METHOD deleteChars (I)V
 		COMMENT Deletes the given number of characters from the current cursor's position, unless there is currently a selection, in which case the selection is deleted instead.
 		ARG 1 num
+	METHOD deleteText (I)V
+		COMMENT Deletes the given amount of text from the current cursor's position,
+		COMMENT unless there is currently a selection, in which case the selection is deleted instead.
+		COMMENT
+		COMMENT If CTRL is down, {@code num} words will be deleted, otherwise {@code num} chars.
+		ARG 1 num
 	METHOD deleteWords (I)V
 		COMMENT Deletes the given number of words from the current cursor's position, unless there is currently a selection, in which case the selection is deleted instead.
 		ARG 1 num
+	METHOD getCursorPos (I)I
+		ARG 1 direction
 	METHOD getCursorPosition ()I
 		COMMENT returns the current position of the cursor
 	METHOD getHighlighted ()Ljava/lang/String;
@@ -30,6 +75,8 @@ CLASS net/minecraft/client/gui/components/EditBox
 		COMMENT returns the width of the textbox depending on if background drawing is enabled
 	METHOD getMaxLength ()I
 		COMMENT returns the maximum number of character that can be contained in this textbox
+	METHOD getScreenX (I)I
+		ARG 1 pos
 	METHOD getValue ()Ljava/lang/String;
 		COMMENT Returns the contents of the textbox
 	METHOD getWordPosition (I)I
@@ -58,6 +105,9 @@ CLASS net/minecraft/client/gui/components/EditBox
 		ARG 1 keyCode
 		ARG 2 scanCode
 		ARG 3 modifiers
+	METHOD lambda$new$0 (Ljava/lang/String;Ljava/lang/Integer;)Lnet/minecraft/util/FormattedCharSequence;
+		ARG 0 text
+		ARG 1 maxLength
 	METHOD mouseClicked (DDI)Z
 		ARG 1 mouseX
 		ARG 3 mouseY
@@ -112,7 +162,11 @@ CLASS net/minecraft/client/gui/components/EditBox
 		COMMENT Sets the maximum length for the text in this text box. If the current text is longer than this length, the current text will be trimmed.
 		ARG 1 length
 	METHOD setResponder (Ljava/util/function/Consumer;)V
-		ARG 1 rssponder
+		COMMENT Set a function to be called when the edit box is modified.
+		COMMENT Its sole argument is the new value of the edit box.
+		ARG 1 responder
+	METHOD setSuggestion (Ljava/lang/String;)V
+		ARG 1 suggestion
 	METHOD setTextColor (I)V
 		COMMENT Sets the color to use when drawing this text box's text. A different color is used if this text box is disabled.
 		ARG 1 color
@@ -128,4 +182,4 @@ CLASS net/minecraft/client/gui/components/EditBox
 	METHOD setX (I)V
 		ARG 1 x
 	METHOD tick ()V
-		COMMENT Increments the cursor counter
+		COMMENT Make the cursor blink
